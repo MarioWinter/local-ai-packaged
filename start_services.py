@@ -36,7 +36,7 @@ def clone_supabase_repo():
     else:
         print("Supabase repository already exists, updating...")
         os.chdir("supabase")
-        run_command(["git", "pull"])
+        run_command(["git", "pull", "--rebase"])
         os.chdir("..")
 
 def prepare_supabase_env():
