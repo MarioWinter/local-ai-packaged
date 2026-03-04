@@ -70,6 +70,7 @@ x-init-ollama: &init-ollama
 
 services:
   flowise:
+    profiles: ["optional"]
     image: flowiseai/flowise
     restart: unless-stopped
     container_name: flowise
@@ -86,6 +87,7 @@ services:
     entrypoint: /bin/sh -c "sleep 3; flowise start"
 
   open-webui:
+    profiles: ["optional"]
     image: ghcr.io/open-webui/open-webui:main
     restart: unless-stopped
     container_name: open-webui
@@ -121,6 +123,7 @@ services:
         condition: service_completed_successfully
 
   qdrant:
+    profiles: ["optional"]
     image: qdrant/qdrant
     container_name: qdrant
     restart: unless-stopped
@@ -131,6 +134,7 @@ services:
       - qdrant_storage:/qdrant/storage
 
   neo4j:
+    profiles: ["optional"]
     image: neo4j:latest
     volumes:
         - ./neo4j/logs:/logs
@@ -183,6 +187,7 @@ services:
         max-file: "1"
 
   langfuse-worker:
+    profiles: ["optional"]
     image: langfuse/langfuse-worker:3
     restart: always
     depends_on: &langfuse-depends-on
@@ -241,6 +246,7 @@ services:
       REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key}
 
   langfuse-web:
+    profiles: ["optional"]
     image: langfuse/langfuse:3
     restart: always
     depends_on: *langfuse-depends-on
@@ -261,6 +267,7 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
 
   clickhouse:
+    profiles: ["optional"]
     image: clickhouse/clickhouse-server
     restart: always
     user: "101:101"
@@ -283,6 +290,7 @@ services:
       start_period: 1s
 
   minio:
+    profiles: ["optional"]
     image: minio/minio
     restart: always
     entrypoint: sh
@@ -371,6 +379,7 @@ services:
         max-file: "1"
 
   browserless:
+    profiles: ["optional"]
     image: ghcr.io/browserless/chromium
     container_name: browserless
     restart: unless-stopped
