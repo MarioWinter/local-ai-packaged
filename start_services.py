@@ -36,7 +36,9 @@ def clone_supabase_repo():
     else:
         print("Supabase repository already exists, updating...")
         os.chdir("supabase")
-        run_command(["git", "pull"])
+        run_command(["git", "stash"])
+        run_command(["git", "pull", "--no-rebase"])
+        run_command(["git", "stash", "pop"])
         os.chdir("..")
 
 def fix_windows_line_endings():
@@ -78,6 +80,7 @@ def start_supabase(environment=None):
     """Start the Supabase services (using its compose file)."""
     print("Starting Supabase services...")
     cmd = ["docker", "compose", "-p", "localai", "-f", "supabase/docker/docker-compose.yml"]
+    cmd.extend(["-f", "docker-compose.override.supabase.yml"])
     if environment and environment == "public":
         cmd.extend(["-f", "docker-compose.override.public.supabase.yml"])
     cmd.extend(["up", "-d"])
