@@ -1,0 +1,11 @@
+# Keine Ports - nur internes Docker-Netzwerk!
+
+services:
+  db:
+    networks:
+      - default
+      - supabase-net
+
+networks:
+  supabase-net:
+    external: true

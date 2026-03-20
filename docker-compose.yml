@@ -106,7 +106,7 @@ services:
       - "-c"
       - "n8n import:credentials --separate --input=/backup/credentials && n8n import:workflow --separate --input=/backup/workflows"
     volumes:
-      - ./n8n/backup:/backup  
+      - ./n8n/backup:/backup
 
   n8n:
     <<: *service-n8n
@@ -166,6 +166,9 @@ services:
       - ./caddy-addon:/etc/caddy/addons:ro      
       - caddy-data:/data:rw
       - caddy-config:/config:rw
+    networks:
+      - default
+      - merch_net
     environment:
       - N8N_HOSTNAME=${N8N_HOSTNAME:-":8001"}
       - WEBUI_HOSTNAME=${WEBUI_HOSTNAME:-":8002"}
@@ -187,7 +190,6 @@ services:
         max-file: "1"
 
   langfuse-worker:
-    profiles: ["optional"]
     image: langfuse/langfuse-worker:3
     restart: always
     depends_on: &langfuse-depends-on
@@ -246,7 +248,6 @@ services:
       REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key}
 
   langfuse-web:
-    profiles: ["optional"]
     image: langfuse/langfuse:3
     restart: always
     depends_on: *langfuse-depends-on
@@ -267,7 +268,6 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
 
   clickhouse:
-    profiles: ["optional"]
     image: clickhouse/clickhouse-server
     restart: always
     user: "101:101"
@@ -290,7 +290,6 @@ services:
       start_period: 1s
 
   minio:
-    profiles: ["optional"]
     image: minio/minio
     restart: always
     entrypoint: sh
@@ -444,3 +443,8 @@ services:
     image: ollama/ollama:rocm
     depends_on:
      - ollama-gpu-amd
+
+networks:
+  merch_net:
+    external: true
+    name: merch_net
