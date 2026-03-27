@@ -1,0 +1,22 @@
+[GENERAL]
+PORT = 3000
+SIMILARITY_MEASURE = "cosine"
+
+[API_KEYS]
+OPENROUTER = ""
+
+[API_ENDPOINTS]
+SEARXNG = "http://searxng:8080"
+OLLAMA = ""
+
+[CHAT_MODEL]
+PROVIDER = "custom_openai"
+MODEL = "openai/gpt-4.1-mini"
+CUSTOM_OPENAI_API_KEY = ""
+CUSTOM_OPENAI_API_URL = "https://openrouter.ai/api/v1"
+
+[EMBEDDING_MODEL]
+PROVIDER = "custom_openai"
+MODEL = "openai/text-embedding-3-small"
+CUSTOM_OPENAI_API_KEY = ""
+CUSTOM_OPENAI_API_URL = "https://openrouter.ai/api/v1"

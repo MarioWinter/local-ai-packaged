@@ -16,6 +16,7 @@ volumes:
   langfuse_clickhouse_data:
   langfuse_clickhouse_logs:
   langfuse_minio_data:
+  vane-data:
 
 x-n8n: &service-n8n
   image: n8nio/n8n:latest
@@ -444,6 +445,36 @@ services:
     depends_on:
      - ollama-gpu-amd
 
+
+  vane:
+    image: itzcrazykns1337/vane:latest
+    container_name: vane
+    restart: unless-stopped
+    expose:
+      - 3000/tcp
+    environment:
+      - PORT=3000
+      - SIMILARITY_MEASURE=cosine
+    volumes:
+      - vane-data:/home/perplexica/data
+      - ./vane/config.toml:/home/perplexica/config.toml
+    depends_on:
+      - searxng
+    networks:
+      - default
+      - merch_net
+
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    container_name: crawl4ai
+    restart: unless-stopped
+    expose:
+      - 11235/tcp
+    environment:
+      - MAX_CONCURRENT_TASKS=5
+    networks:
+      - default
+      - merch_net
 networks:
   merch_net:
     external: true
