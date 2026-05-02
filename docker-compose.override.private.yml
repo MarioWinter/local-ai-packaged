@@ -1,4 +1,13 @@
 services:
+  vane:
+    image: ghcr.io/mariowinter/vane:merch-miner
+    pull_policy: always
+    environment:
+      - HOSTNAME=0.0.0.0
+    ports:
+      - 127.0.0.1:3010:3000
+    volumes:
+      - vane-data:/home/vane/data
   flowise:
     ports:
       - 127.0.0.1:3001:3001
@@ -52,6 +61,10 @@ services:
   searxng:
     ports:
       - 127.0.0.1:8081:8080
+
+  crawl4ai:
+    ports:
+      - 127.0.0.1:11235:11235
 
   ollama-cpu:
     ports:
