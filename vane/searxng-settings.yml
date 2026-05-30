@@ -12,16 +12,29 @@ search:
 server:
   secret_key: 'a2fb23f1b02e6ee83875b09826990de0f6bd908b6638e8c10277d415f6ab852b'
 
-# 2026-05-30 — TEMPORARY revert to multi-engine while ScraperOps custom-engine
-# integration is researched. Original plan: single brave-scrapeops engine via
-# proxy.scrapeops.io wrapper API. Implementation hit a SearXNG engine-processor
-# binding issue where the engine loads + appears in /config but never fires
-# during search (no logs, no errors, just 0 results). Documented in
-# project_searxng_engine_config.md.
+# 2026-05-30 — Single-engine: Brave via ScraperOps wrapper.
 #
-# Pending: investigate ScraperOps residential-proxy mode (HTTP CONNECT) OR
-# Brave Search API direct key instead of the wrapper-API approach.
+# Only `brave-scrapeops` (custom engine that wraps Brave queries
+# through https://proxy.scrapeops.io/v1/?api_key=K&url=ENC&render_js=true)
+# is enabled. Brave migrated to a JS-rendered Svelte SPA; render_js=true
+# lets ScraperOps headless-render the page so the brave HTML parser can
+# extract results. Anti-bot + residential IP rotation handled by SO.
+#
+# One chat query = one outbound request to proxy.scrapeops.io = one
+# ScraperOps credit.
+#
+# Engine module: vane/searxng-engines/brave_scrapeops.py
+# Env var: SCRAPEOPS_API_KEY (forwarded into the searxng subshell by
+# the custom vane/entrypoint.sh).
 engines:
+  - name: brave-scrapeops
+    engine: brave_scrapeops
+    shortcut: bsops
+    categories: [general, web]
+    timeout: 60.0
+    disabled: false
+
+  # Disable every other default engine so only brave-scrapeops fires.
   - name: brave
     disabled: true
   - name: duckduckgo
@@ -29,6 +42,8 @@ engines:
   - name: startpage
     disabled: true
   - name: google
+    disabled: true
+  - name: bing
     disabled: true
   - name: qwant
     disabled: true
@@ -43,12 +58,10 @@ engines:
   - name: karmasearch videos
     disabled: true
   - name: mojeek
-    disabled: false
-  - name: bing
-    disabled: false
+    disabled: true
   - name: yahoo
-    disabled: false
-  - name: ecosia
-    disabled: false
-  - name: swisscows
-    disabled: false
+    disabled: true
+  - name: aol
+    disabled: true
+  - name: wolframalpha
+    disabled: true

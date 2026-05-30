@@ -1,21 +1,32 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Brave Search routed through the ScraperOps wrapper API.
 
-We do NOT delegate to searx.engines.brave.request() because that
-function reads brave.py module-locals (traits, Goggles, brave_category,
-etc.) that SearXNG only populates for ENABLED engines. Since we want
-brave disabled here (we only want our wrapped variant firing), brave.pys
-traits never get initialized and delegation crashes with NameError.
+Brave's SERP migrated to a JavaScript-rendered Svelte SPA. The native
+SearXNG `brave` engine assumes the older server-rendered HTML and
+returns 0 results against the current Brave. Combined with our Strato
+datacenter IP getting 429-rate-limited by Brave directly, the stock
+engine is unusable for the chat.
 
-Instead we build the search.brave.com URL inline ourselves, then wrap
-that URL through the ScraperOps proxy. The Brave HTML parser (response)
-is still delegated to brave.py because that function is pure-input.
+This wrapper:
+1. Builds the search.brave.com URL itself (avoids brave.py's `traits`
+   module-locals which only get populated for enabled engines and crash
+   the request when delegated).
+2. Wraps that URL through ScraperOps's wrapper API endpoint
+   (https://proxy.scrapeops.io/v1/?api_key=$KEY&url=$ENC&render_js=true)
+   so ScraperOps handles anti-bot, residential IP rotation, AND
+   JS-rendering of Brave's SPA to a parseable HTML.
+3. Delegates `response()` to the upstream brave engine's HTML parser
+   — once the page is rendered, the structure brave.py reads (the
+   `<script>data: [{...}]</script>` block) is back in the served HTML.
 
-One outbound HTTP per chat query = 1 ScraperOps credit. Anti-bot and
-residential IP rotation handled by ScraperOps.
+One outbound HTTP per chat search = 1 ScraperOps credit (verified via
+`sops_api_credits: 1` response header). Anti-bot + residential IP +
+JS-rendering all handled by ScraperOps.
 
-Required env: SCRAPEOPS_API_KEY (passed into Vane container by the
-local-ai-packaged compose override).
+Required env: ``SCRAPEOPS_API_KEY`` — forwarded into the Vane
+container by the local-ai-packaged compose override. SCRAPEOPS_API_KEY
+must also be exported in the sudo subshell that runs the embedded
+SearXNG; the override mounts a custom entrypoint.sh that does this.
 """
 import os
 from urllib.parse import quote_plus, urlencode
@@ -37,13 +48,8 @@ time_range_support = True
 SCRAPEOPS_PROXY_URL = "https://proxy.scrapeops.io/v1/"
 BRAVE_BASE_URL = "https://search.brave.com/search"
 
-# Map SearXNG time_range tokens to Braves tf param.
-TIME_RANGE_MAP = {
-    "day": "pd",
-    "week": "pw",
-    "month": "pm",
-    "year": "py",
-}
+# Map SearXNG time_range tokens to Brave's `tf` query param.
+TIME_RANGE_MAP = {"day": "pd", "week": "pw", "month": "pm", "year": "py"}
 
 
 def request(query, params):
@@ -53,6 +59,7 @@ def request(query, params):
             "brave_scrapeops: SCRAPEOPS_API_KEY not set in Vane env; "
             "skipping query."
         )
+        # Empty url is SearXNG's idiom for "this engine has no work to do".
         params["url"] = ""
         return
 
@@ -69,10 +76,9 @@ def request(query, params):
         SCRAPEOPS_PROXY_URL
         + "?api_key=" + quote_plus(api_key)
         + "&url=" + quote_plus(brave_url)
-        + "&render_js=false"
+        + "&render_js=true"
     )
-    params["headers"]["Accept-Encoding"] = "gzip, deflate"
-    # ScraperOps does not forward cookies; clear any default SearXNG set.
+    # ScraperOps does not forward cookies through to the target.
     params["cookies"] = {}
 
 
