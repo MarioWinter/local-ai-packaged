@@ -1,0 +1,51 @@
+use_default_settings: true
+
+general:
+  instance_name: 'searxng'
+
+search:
+  autocomplete: 'google'
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: 'a2fb23f1b02e6ee83875b09826990de0f6bd908b6638e8c10277d415f6ab852b'
+
+# 2026-05-29 — Engine swap: Brave + DDG → Mojeek + Bing
+# Brave runs into rate-limit (429) under parallel-fire, DuckDuckGo permanently
+# CAPTCHA-blocks our scraper-IP. Mojeek (own crawler, tolerant) + Bing (stable
+# from this IP) replace them. Wikipedia/Wikidata stay for infobox lookups.
+engines:
+  - name: wolframalpha
+    disabled: false
+  - name: brave
+    disabled: true
+  - name: duckduckgo
+    disabled: true
+  - name: startpage
+    disabled: true
+  - name: google
+    disabled: true
+  - name: qwant
+    disabled: true
+  - name: qwant news
+    disabled: true
+  - name: qwant images
+    disabled: true
+  - name: qwant videos
+    disabled: true
+  - name: karmasearch
+    disabled: true
+  - name: karmasearch videos
+    disabled: true
+  - name: mojeek
+    disabled: false
+  - name: bing
+    disabled: false
+  - name: yahoo
+    disabled: false
+  - name: ecosia
+    disabled: false
+  - name: swisscows
+    disabled: false

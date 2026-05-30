@@ -8,6 +8,7 @@ services:
       - 127.0.0.1:3010:3000
     volumes:
       - vane-data:/home/vane/data
+      - ./vane/searxng-settings.yml:/etc/searxng/settings.yml
   flowise:
     ports:
       - 127.0.0.1:3001:3001
