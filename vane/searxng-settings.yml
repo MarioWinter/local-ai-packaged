@@ -12,13 +12,16 @@ search:
 server:
   secret_key: 'a2fb23f1b02e6ee83875b09826990de0f6bd908b6638e8c10277d415f6ab852b'
 
-# 2026-05-29 — Engine swap: Brave + DDG → Mojeek + Bing
-# Brave runs into rate-limit (429) under parallel-fire, DuckDuckGo permanently
-# CAPTCHA-blocks our scraper-IP. Mojeek (own crawler, tolerant) + Bing (stable
-# from this IP) replace them. Wikipedia/Wikidata stay for infobox lookups.
+# 2026-05-30 — TEMPORARY revert to multi-engine while ScraperOps custom-engine
+# integration is researched. Original plan: single brave-scrapeops engine via
+# proxy.scrapeops.io wrapper API. Implementation hit a SearXNG engine-processor
+# binding issue where the engine loads + appears in /config but never fires
+# during search (no logs, no errors, just 0 results). Documented in
+# project_searxng_engine_config.md.
+#
+# Pending: investigate ScraperOps residential-proxy mode (HTTP CONNECT) OR
+# Brave Search API direct key instead of the wrapper-API approach.
 engines:
-  - name: wolframalpha
-    disabled: false
   - name: brave
     disabled: true
   - name: duckduckgo

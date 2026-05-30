@@ -4,11 +4,14 @@ services:
     pull_policy: always
     environment:
       - HOSTNAME=0.0.0.0
+      - SCRAPEOPS_API_KEY=${SCRAPEOPS_API_KEY}
     ports:
       - 127.0.0.1:3010:3000
     volumes:
       - vane-data:/home/vane/data
       - ./vane/searxng-settings.yml:/etc/searxng/settings.yml
+      - ./vane/searxng-engines/brave_scrapeops.py:/usr/local/searxng/searxng-src/searx/engines/brave_scrapeops.py:ro
+      - ./vane/entrypoint.sh:/home/vane/entrypoint.sh:ro
   flowise:
     ports:
       - 127.0.0.1:3001:3001
