@@ -30,7 +30,7 @@ SQL
 }
 
 echo "restore test of $RUN_DIR with $IMAGE"
-docker run -d --name "$CONTAINER" --network none -e POSTGRES_PASSWORD=restore-test \
+docker run -d --name "$CONTAINER" --network none --shm-size=1g -e POSTGRES_PASSWORD=restore-test \
   -v "$VOLUME":/var/lib/postgresql/data "$IMAGE" > /dev/null
 until docker exec "$CONTAINER" pg_isready -U postgres -h localhost > /dev/null 2>&1; do sleep 2; done
 sleep 5
